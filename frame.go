@@ -359,6 +359,7 @@ func (lf LongFrame) decodeData(data []byte) ([]DecodedDataRecord, error) {
 			// 1111	Special Functions
 			case 0x0f:
 				remainingData = 0 // TODO what here?
+				dData.RawValue = 123456
 			}
 			lookForData = false
 			dif = -1
