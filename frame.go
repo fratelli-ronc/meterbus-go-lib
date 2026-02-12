@@ -356,10 +356,12 @@ func (lf LongFrame) decodeData(data []byte) ([]DecodedDataRecord, error) {
 				remainingData = 5
 				dData.RawValue = float64(bcdToInt(data[i : i+6]))
 
-			// 1111	Special Functions
+			// // 1111	Special Functions
 			case 0x0f:
-				remainingData = 0 // TODO what here?
-				dData.RawValue = 123456
+				dData.Function = decodeRecordFunction(v)
+				dData.ManufacturerData = append([]byte{}, data[i+1:]...)
+				records = append(records, dData)
+				return records, nil
 			}
 			lookForData = false
 			dif = -1
@@ -398,9 +400,10 @@ type DecodedDataRecord struct {
 	Type     string
 	Quantity string
 
-	Value       float64
-	ValueString string
-	RawValue    float64
+	Value            float64
+	ValueString      string
+	RawValue         float64
+	ManufacturerData []byte
 
 	HasMoreRecords bool
 }
