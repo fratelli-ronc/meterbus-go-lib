@@ -131,8 +131,8 @@ func SetPrimaryUsingPrimary(oldPrimary uint8, newPrimary uint8) LongFrame {
 }
 
 // ReadAllFrames supports FCB and reads out all frames from the device using primaryID.
-func ReadAllFrames(conn Conn, primaryID int) ([]*DecodedFrame, error) {
-	frame := SndNKE(uint8(primaryID))
+func ReadAllFrames(conn Conn, primaryID uint8, timeout time.Duration) ([]*DecodedFrame, error) {
+	frame := SndNKE(primaryID)
 	fmt.Printf("sending nke: % x\n", frame)
 	_, err := conn.Write(frame)
 	if err != nil {
@@ -166,7 +166,7 @@ func ReadAllFrames(conn Conn, primaryID int) ([]*DecodedFrame, error) {
 			return nil, err
 		}
 
-		resp, err := ReadLongFrame(conn)
+		resp, err := ReadLongFrame(conn, timeout)
 		if err != nil {
 			return nil, err
 		}
@@ -182,13 +182,13 @@ func ReadAllFrames(conn Conn, primaryID int) ([]*DecodedFrame, error) {
 }
 
 // ReadSingleFrame reads one frame from the device. Does not reset device before asking.
-func ReadSingleFrame(conn Conn, primaryID uint8) (*DecodedFrame, error) {
+func ReadSingleFrame(conn Conn, primaryID uint8, timeout time.Duration) (*DecodedFrame, error) {
 	frame := RequestUD2(primaryID)
 	if _, err := conn.Write(frame); err != nil {
 		return nil, err
 	}
 
-	resp, err := ReadLongFrame(conn)
+	resp, err := ReadLongFrame(conn, timeout)
 	if err != nil {
 		return nil, err
 	}

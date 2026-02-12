@@ -23,7 +23,7 @@ import (
 */
 var ErrNoLongFrameFound = fmt.Errorf("no long frame found")
 
-func ReadLongFrame(conn Conn) (LongFrame, error) {
+func ReadLongFrame(conn Conn, timeout time.Duration) (LongFrame, error) {
 	buf := make([]byte, 4096)
 	tmp := make([]byte, 4096)
 
@@ -31,7 +31,7 @@ func ReadLongFrame(conn Conn) (LongFrame, error) {
 	length := 0
 	globalN := -1
 	for {
-		err := conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+		err := conn.SetReadDeadline(time.Now().Add(timeout))
 		if err != nil {
 			return LongFrame{}, fmt.Errorf("error from SetReadDeadline: %w", err)
 		}
