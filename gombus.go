@@ -1,7 +1,6 @@
 package gombus
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -41,7 +40,7 @@ func ApplicationReset(primaryID uint8) LongFrame {
 }
 
 // water meter has 19004636 7704 14 07.
-func SendUD2() LongFrame {
+func RequestPageChange(primaryID uint8, memoryPage uint8) LongFrame {
 	data := LongFrame{
 		0x68, // Start byte long/control
 		0x00, // length
@@ -49,20 +48,16 @@ func SendUD2() LongFrame {
 		0x68, // Start byte long/control
 
 		0x73, // REQ_UD2
-		0xFD,
-		0x52, // CI-field selection of slave
+		primaryID,
+		0x51, // CI-field data send
 
-		0x00, // address
-		0x00, // address
-		0x00, // address
-		0x00, // address
+		0xF,  // address
+		0x2,  // address
+		0x78, // address
 
-		0xFF, // manufacturer code
-		0xFF, // manufacturer code
+		memoryPage,
 
-		0xFF, // id
-
-		0xFF, // medium code
+		0x0, // medium code
 
 		0x00, // checksum
 		0x16, // stop byte
@@ -130,10 +125,29 @@ func SetPrimaryUsingPrimary(oldPrimary uint8, newPrimary uint8) LongFrame {
 	return data
 }
 
+func SendPageChange(conn Conn, primaryID uint8, memoryPage uint8, timeout time.Duration) error {
+	frame := RequestPageChange(primaryID, memoryPage)
+
+	_, err := conn.Write(frame)
+	if err != nil {
+		return err
+	}
+
+	err = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if err != nil {
+		return err
+	}
+	err = ReadAckFrame(conn)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ReadAllFrames supports FCB and reads out all frames from the device using primaryID.
 func ReadAllFrames(conn Conn, primaryID uint8, timeout time.Duration) ([]*DecodedFrame, error) {
 	frame := SndNKE(primaryID)
-	fmt.Printf("sending nke: % x\n", frame)
 	_, err := conn.Write(frame)
 	if err != nil {
 		return nil, err
@@ -143,7 +157,7 @@ func ReadAllFrames(conn Conn, primaryID uint8, timeout time.Duration) ([]*Decode
 	if err != nil {
 		return nil, err
 	}
-	_, err = ReadSingleCharFrame(conn)
+	err = ReadAckFrame(conn)
 	if err != nil {
 		return nil, err
 	}
@@ -181,9 +195,24 @@ func ReadAllFrames(conn Conn, primaryID uint8, timeout time.Duration) ([]*Decode
 	return frames, nil
 }
 
-// ReadSingleFrame reads one frame from the device. Does not reset device before asking.
+// ReadSingleFrame reads one frame from the device.
 func ReadSingleFrame(conn Conn, primaryID uint8, timeout time.Duration) (*DecodedFrame, error) {
-	frame := RequestUD2(primaryID)
+	frame := SndNKE(primaryID)
+	_, err := conn.Write(frame)
+	if err != nil {
+		return nil, err
+	}
+
+	err = conn.SetReadDeadline(time.Now().Add(timeout))
+	if err != nil {
+		return nil, err
+	}
+	err = ReadAckFrame(conn)
+	if err != nil {
+		return nil, err
+	}
+
+	frame = RequestUD2(primaryID)
 	if _, err := conn.Write(frame); err != nil {
 		return nil, err
 	}

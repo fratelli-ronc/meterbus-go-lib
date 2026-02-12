@@ -48,11 +48,9 @@ func ReadLongFrame(conn Conn, timeout time.Duration) (LongFrame, error) {
 	}
 }
 
-func ReadSingleCharFrame(r io.Reader) (LongFrame, error) {
+func ReadAckFrame(r io.Reader) error {
 	buf := bufio.NewReader(r)
-	msg, err := buf.ReadBytes(SingleCharacterFrame)
-	if err != nil {
-		return nil, err
-	}
-	return LongFrame(msg), nil
+	_, err := buf.ReadBytes(SingleCharacterFrame)
+
+	return err
 }
