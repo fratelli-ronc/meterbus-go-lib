@@ -182,8 +182,8 @@ func ReadAllFrames(conn Conn, primaryID int) ([]*DecodedFrame, error) {
 }
 
 // ReadSingleFrame reads one frame from the device. Does not reset device before asking.
-func ReadSingleFrame(conn Conn, primaryID int) (*DecodedFrame, error) {
-	frame := RequestUD2(uint8(primaryID))
+func ReadSingleFrame(conn Conn, primaryID uint8) (*DecodedFrame, error) {
+	frame := RequestUD2(primaryID)
 	if _, err := conn.Write(frame); err != nil {
 		return nil, err
 	}
