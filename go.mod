@@ -1,4 +1,4 @@
-module github.com/jonaz/gombus
+module github.com/fratelli-ronc/meterbus-go-lib
 
 go 1.20
 
