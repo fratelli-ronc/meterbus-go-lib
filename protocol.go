@@ -178,12 +178,13 @@ func decodeUnit(vif byte, vife []byte) Unit {
 
 	logrus.Tracef("vif raw is: % x\n", vif)
 	logrus.Tracef("vife raw is: % x\n", vife)
-	if vif == 0xFB {
+	switch vif {
+	case 0xFB:
 		code = int(vife[0])&DIB_VIF_WITHOUT_EXTENSION | 0x200
-	} else if vif == 0xFD {
+	case 0xFD:
 		code = int(vife[0])&DIB_VIF_WITHOUT_EXTENSION | 0x100
 		// } else if vif == 0x7C {  // handled in frame.go
-	} else if vif == 0xFC {
+	case 0xFC:
 		code := vife[0] & DIB_VIF_WITHOUT_EXTENSION
 		var factor float64
 
@@ -201,7 +202,7 @@ func decodeUnit(vif byte, vife []byte) Unit {
 			Type:        VIFUnit["VARIABLE_VIF"],
 			VIFUnitDesc: "",
 		}
-	} else {
+	default:
 		code = int(vif) & DIB_VIF_WITHOUT_EXTENSION
 	}
 
@@ -224,7 +225,7 @@ func decodeStorageNumber(dif int, dife []byte) int {
 	return result
 }
 
-func decodeTariff(dif int, dife []byte) int {
+func decodeTariff(dife []byte) int {
 	bitIndex := 0
 	result := 0
 	size := len(dife)
@@ -236,7 +237,7 @@ func decodeTariff(dif int, dife []byte) int {
 	return result
 }
 
-func decodeDevice(dif int, dife []byte) int {
+func decodeDevice(dife []byte) int {
 	bitIndex := 0
 	result := 0
 
@@ -292,26 +293,11 @@ func int32ToInt(data []byte) (int, error) {
 	return int(i), nil
 }
 
-func int24ToInt(b []byte) int {
-	_ = b[2] // bounds check hint to compiler; see golang.org/issue/14808
-	return int(uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16)
-}
-
 func checkKthBitSet(n, k int) bool {
 	if n&(1<<(k)) == 0 {
 		return false
 	}
 	return true
-}
-
-// setBit set bits at pos. example 0000 pos 1 will be 0010.
-func setBit(n byte, pos uint) byte {
-	n |= (1 << pos)
-	return n
-}
-
-func setBitFromMask(b, mask byte) byte {
-	return b | mask
 }
 
 func calcCheckSum(data []byte) byte {

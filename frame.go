@@ -249,8 +249,8 @@ func (lf LongFrame) decodeData(data []byte) ([]DecodedDataRecord, error) {
 				dData.Unit = decodeUnit(vif, vife)
 			}
 			dData.StorageNumber = decodeStorageNumber(dif, dife)
-			dData.Device = decodeDevice(dif, dife)
-			dData.Tariff = decodeTariff(dif, dife)
+			dData.Device = decodeDevice(dife)
+			dData.Tariff = decodeTariff(dife)
 
 			difCoding := dif & DATA_RECORD_DIF_MASK_DATA
 			logrus.Tracef("Datarecord dif mask: %b ( %#x )", difCoding, difCoding)

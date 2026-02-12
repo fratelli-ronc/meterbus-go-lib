@@ -790,13 +790,6 @@ var unitTable = map[int]Unit{
 	0x27F: {Exp: 1.0e4, Unit: measureUnit["W"], VIFUnitDesc: "Cumul count max power"},
 }
 
-var telegramDateMasks = map[string]int{
-	"DATE":          0x02, // "Actual Date",            	0010 Type G
-	"DATE_TIME":     0x04, // "Actual Date and Time",    	0100 Type F
-	"EXT_TIME":      0x03, // "Extended Date",           	0011 Type J
-	"EXT_DATE_TIME": 0x60, // "Extended Date and Time", 	0110 Type I
-}
-
 var dateCalculatorMasks = map[string]int{
 	"SECOND_MASK":       0x3F, // 0011 1111
 	"MINUTE_MASK":       0x3F, // 0011 1111

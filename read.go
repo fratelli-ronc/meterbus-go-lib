@@ -7,20 +7,6 @@ import (
 	"time"
 )
 
-/*
-// Does not handle timeout! the new one in tcp.go does
-// perhaps use io.ReadCloser and close after timeout?
-
-	func ReadLongFrame(r io.Reader) (LongFrame, error) {
-		buf := bufio.NewReader(r)
-		// TODO if this should be used again must implement whole frame detection from conn.ReadLongFrame
-		msg, err := buf.ReadBytes(0x16)
-		if err != nil {
-			return nil, err
-		}
-		return LongFrame(msg), nil
-	}
-*/
 var ErrNoLongFrameFound = fmt.Errorf("no long frame found")
 
 func ReadLongFrame(conn Conn, timeout time.Duration) (LongFrame, error) {
@@ -69,16 +55,4 @@ func ReadSingleCharFrame(r io.Reader) (LongFrame, error) {
 		return nil, err
 	}
 	return LongFrame(msg), nil
-}
-
-// ReadAnyAndPrint is used for debugging.
-func ReadAnyAndPrint(r io.Reader) error {
-	tmp := make([]byte, 256) // using small tmo buffer for demonstrating
-	for {
-		n, err := r.Read(tmp)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("% x\n", tmp[:n])
-	}
 }
